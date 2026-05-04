@@ -1,0 +1,33 @@
+<header class="main-header">
+    <div class="nav-container">
+        <div class="logo" routerLink="/">
+            <span class="brand-d">DIGITAL</span><span class="brand-s">STORE</span>
+        </div>
+
+        <nav class="nav-links">
+            <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a>
+            <a routerLink="/products" routerLinkActive="active">Products</a>
+        </nav>
+
+        <div class="header-actions">
+            <div class="auth-group">
+                @if (authService.currentUser()) {
+                <div class="user-profile-nav" routerLink="/auth/profile">
+                    <img [src]="authService.currentUser()?.avatar || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'"
+                        class="nav-avatar" alt="User">
+                    <span>{{ authService.currentUser()?.firstName }}</span>
+                </div>
+                <button class="btn-logout" (click)="logout()">Logout</button>
+                } @else {
+                <button class="btn-login" routerLink="/auth/login">Login</button>
+                <button class="btn-register" routerLink="/auth/register">Register</button>
+                }
+            </div>
+
+            <div class="cart-wrapper" routerLink="/cart">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span class="cart-count">{{ cartCount ()}}</span>
+            </div>
+        </div>
+    </div>
+</header>

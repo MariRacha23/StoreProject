@@ -1,0 +1,59 @@
+@if (product(); as p) {
+<div class="container detail-container">
+  <div class="product-layout">
+
+    <div class="image-section">
+      <img [src]="selectedImage()" [alt]="p.title" class="main-image">
+
+      <div class="thumbnail-list">
+        <img [src]="p.thumbnail" class="small-thumb" [class.active]="selectedImage() === p.thumbnail"
+          (click)="selectImage(p.thumbnail)">
+
+        @for (img of p.images; track $index) {
+        <img [src]="img" class="small-thumb" [class.active]="selectedImage() === img" (click)="selectImage(img)">
+        }
+      </div>
+    </div>
+
+    <div class="info-section">
+      <nav class="breadcrumb">Products / {{ p.category.name }}</nav>
+      <h1>{{ p.title }}</h1>
+      <div class="rating">⭐ {{ p.rating }} (Review Score)</div>
+
+      <div class="price-box">
+        <span class="current-price">{{ p.price.current | currency:'USD' }}</span>
+        @if (p.price.beforeDiscount > p.price.current) {
+        <span class="old-price">{{ p.price.beforeDiscount | currency:'USD' }}</span>
+        }
+      </div>
+
+      <p class="description">{{ p.description }}</p>
+
+      <div class="stock-status" [class.low]="p.stock < 10">
+        Status: {{ p.stock > 0 ? 'In Stock (' + p.stock + ')' : 'Out of Stock' }}
+      </div>
+
+      <div class="actions">
+        <div class="qty-control">
+          <button (click)="updateQuantity(-1)" [disabled]="quantity() <= 1">-</button>
+          <span class="qty-value">{{ quantity() }}</span>
+          <button (click)="updateQuantity(1)" [disabled]="quantity() >= p.stock">+</button>
+        </div>
+
+        <button class="add-btn" (click)="addToCart()">
+          Add to Cart — {{ (product()?.price?.current * quantity()) | currency:'USD' }} 🛒
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+} @else if (errorMessage) {
+  <div class="container error-container" style="text-align: center; padding: 50px;">
+    <h2>Oops! Product not found.</h2>
+    <p>The item you are looking for might have been moved or deleted.</p>
+    <button routerLink="/products" class="shop-now-btn">Back to Shop</button>
+  </div>
+} @else {
+  <div class="loader">Loading product details...</div>
+}

@@ -1,0 +1,45 @@
+<div class="container cart-container">
+  <h1>Your Shopping Cart 🛒</h1>
+
+  @if (cartData() && cartData().products?.length > 0) {
+  <div class="cart-layout">
+    <div class="cart-items">
+      @for (item of cartData()?.products; track item.productId) {
+      @if (item.product) {
+      <div class="cart-card">
+        <img [src]="item.product.thumbnail" [alt]="item.product.title">
+        <div class="item-info">
+          <h3>{{ item.product.title }}</h3>
+          <p>{{ item.product.price?.current | currency:'USD' }}</p>
+        </div>
+        <div class="item-actions">
+          <span>Qty: {{ item.quantity }}</span>
+          <button (click)="removeItem(item.productId)" class="remove-btn">🗑️</button>
+        </div>
+      </div>
+      } @else {
+      <div class="cart-card error-card">
+        <p>Product ID: {{ item.productId }} - Info missing</p>
+      </div>
+      }
+      }
+    </div>
+
+    <div class="cart-summary">
+      <h3>Order Summary</h3>
+      <hr>
+      <div class="summary-row">
+        <span>Total:</span>
+        <span class="total-price">{{ cartData()?.total?.price?.current | currency:'USD' }}</span>
+      </div>
+      <button class="checkout-btn">Proceed to Checkout</button>
+    </div>
+  </div>
+  } @else {
+  <div class="empty-cart">
+    <i class="fa-solid fa-bag-shopping"></i>
+    <h2>Your cart is feeling a bit light... 💨</h2>
+    <button routerLink="/products">Explore Products</button>
+  </div>
+  }
+</div>

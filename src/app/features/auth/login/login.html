@@ -1,0 +1,45 @@
+<div class="auth-card">
+  <h2>Login</h2>
+  <form [formGroup]="loginForm" (ngSubmit)="login()">
+    <div class="field">
+      <label>Email</label>
+      <input type="email" formControlName="email" placeholder="example@mail.com" />
+    </div>
+
+    <div class="field">
+      <label>Password</label>
+      <input type="password" formControlName="password" placeholder="******" />
+      <a (click)="showRecovery.set(true)" class="forgot-password">Forgot Password?</a>
+    </div>
+    @if (showRecovery()) {
+    <div class="recovery-section">
+      <h3>Reset Password</h3>
+      <p>Enter your email to receive a recovery code.</p>
+
+      <input type="email" #recoveryEmail placeholder="Your Email" class="recovery-input">
+
+      <div class="recovery-actions">
+        <button class="btn-send" (click)="sendRecovery(recoveryEmail.value)">
+          Send Code
+        </button>
+        <button class="btn-cancel" (click)="showRecovery.set(false)">
+          Cancel
+        </button>
+      </div>
+    </div>
+    }
+
+    @if (errorMessage()) {
+    <p class="error-text">{{ errorMessage() }}</p>
+    }
+
+    <form [formGroup]="loginForm" (ngSubmit)="login()">
+      <button type="submit" class="btn-login" [disabled]="loginForm.invalid">
+        LOGIN
+      </button>
+    </form>
+    <div class="footer-link">
+      Don't have an account? <a routerLink="/auth/register">Sign Up</a>
+    </div>
+  </form>
+</div>

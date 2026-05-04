@@ -1,0 +1,87 @@
+<section class="hero">
+  <div class="hero-content">
+    <h1 class="fade-in-up">Discover Future Tech</h1>
+    <p class="fade-in-up-delay">Best deals on Laptops, Smartphones, and Accessories</p>
+    <button class="shop-now-btn fade-in-up-delay-2" (click)="scrollToProducts()">Shop Now</button>
+  </div>
+</section>
+
+<div class="search-filters-container container">
+  <div class="filter-group main-search">
+    <i class="search-icon">🔍</i>
+    <input 
+      type="text" 
+      [(ngModel)]="searchQuery" 
+      (input)="onSearch()" 
+      placeholder="Search product by name..."
+    >
+  </div>
+
+  <div class="filter-group price-filters">
+    <input 
+      type="number" 
+      [(ngModel)]="minPrice" 
+      (input)="onSearch()" 
+      placeholder="Min Price"
+    >
+    <span class="divider">-</span>
+    <input 
+      type="number" 
+      [(ngModel)]="maxPrice" 
+      (input)="onSearch()" 
+      placeholder="Max Price"
+    >
+  </div>
+
+  <div class="filter-group rating-filter">
+    <select [(ngModel)]="rating" (change)="onSearch()">
+      <option [ngValue]="undefined">All Ratings</option>
+      <option [ngValue]="4">4+ Stars</option>
+      <option [ngValue]="3">3+ Stars</option>
+      <option [ngValue]="5">5 Stars only</option>
+    </select>
+  </div>
+</div>
+
+<div class="container" id="products-section">
+  <h2 class="section-title">
+    {{ searchQuery() ? 'Search Results' : 'New Arrivals' }}
+  </h2>
+
+  <div class="products-grid">
+    @for (product of products(); track product._id) {
+      <div class="product-card slide-in">
+        <div class="image-wrapper" [routerLink]="['/product', product._id]">
+          <img [src]="product.thumbnail" [alt]="product.title">
+        </div>
+
+        <div class="card-info">
+          <h3>{{ product.title }}</h3>
+          <div class="rating">⭐ {{ product.rating }}</div>
+          <div class="price-tag">
+            {{ product.price.current | currency:'USD' }}
+          </div>
+          <button class="add-to-cart-btn" (click)="addToCart($event, product)">
+            Add to Cart
+          </button>
+        </div>
+      </div>
+    } @empty {
+      <div class="no-results">
+        <p>No products found matching your criteria 😕</p>
+      </div>
+    }
+  </div>
+
+  @if (!searchQuery()) {
+    <div class="pagination-controls">
+      <button class="pag-btn" [disabled]="currentPage() === 1" (click)="loadPage(currentPage() - 1)">
+        Previous
+      </button>
+      <span class="page-info">Page {{ currentPage() }} of {{ totalPages() }}</span>
+      <button class="pag-btn" [disabled]="currentPage() === totalPages()" (click)="loadPage(currentPage() + 1)">
+        Next
+      </button>
+    </div>
+  }
+</div>

@@ -1,0 +1,29 @@
+import { CommonModule } from '@angular/common';
+import { Component, inject, OnInit } from '@angular/core';
+import { Router, RouterModule } from '@angular/router';
+import { Auth } from '../../core/auth/auth';
+import { CartService } from '../../core/services/cart.service';
+import { toSignal } from '@angular/core/rxjs-interop';
+
+@Component({
+  selector: 'app-header',
+  imports: [RouterModule, CommonModule],
+  templateUrl: './header.html',
+  styleUrl: './header.css',
+})
+export class Header implements OnInit {
+  public authService = inject(Auth);
+  private router = inject(Router);
+  private cartService = inject(CartService);
+  public cartCount = toSignal(this.cartService.cartCount$, { initialValue: 0 });
+
+  ngOnInit() {
+    this.cartService.updateCartCount();
+  }
+
+  logout() {
+    sessionStorage.removeItem('user_token');
+    this.authService.currentUser.set(null);
+    this.router.navigate(['/auth/login']);
+  }
+}

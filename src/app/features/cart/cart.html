@@ -7,19 +7,27 @@
       @for (item of cartData()?.products; track item.productId) {
       @if (item.product) {
       <div class="cart-card">
-        <img [src]="item.product.thumbnail" [alt]="item.product.title">
-        <div class="item-info">
-          <h3>{{ item.product.title }}</h3>
-          <p>{{ item.product.price?.current | currency:'USD' }}</p>
+        <div class="img-and-titl">
+          <img [src]="item.product.thumbnail" [alt]="item.product.title">
+          <div class="item-info">
+            <h3>{{ item.product.title }}</h3>
+            <p>{{ item.product.price?.current | currency:'USD' }}</p>
+          </div>
         </div>
+
         <div class="item-actions">
-          <span>Qty: {{ item.quantity }}</span>
-          <button (click)="removeItem(item.productId)" class="remove-btn">🗑️</button>
+          <div class="quantity-controls">
+            <button (click)="changeQuantity(item.productId, item.quantity, -1)"
+              [disabled]="item.quantity <= 1">-</button>
+            <span class="qty-num">{{ item.quantity }}</span>
+            <button (click)="changeQuantity(item.productId, item.quantity, 1)"
+              [disabled]="item.quantity >= item.product.stock">
+              +
+            </button>
+          </div>
+
+          <button (click)="removeItem(item.productId)" class="remove-btn" title="Remove item">🗑️</button>
         </div>
-      </div>
-      } @else {
-      <div class="cart-card error-card">
-        <p>Product ID: {{ item.productId }} - Info missing</p>
       </div>
       }
       }
@@ -32,14 +40,14 @@
         <span>Total:</span>
         <span class="total-price">{{ cartData()?.total?.price?.current | currency:'USD' }}</span>
       </div>
-      <button class="checkout-btn">Proceed to Checkout</button>
+      <button (click)="onCheckout()" class="checkout-btn">Proceed to Checkout</button>
     </div>
   </div>
   } @else {
   <div class="empty-cart">
     <i class="fa-solid fa-bag-shopping"></i>
     <h2>Your cart is feeling a bit light... 💨</h2>
-    <button routerLink="/products">Explore Products</button>
+    <button routerLink="/products" class="explore-btn">Explore Products</button>
   </div>
   }
 </div>

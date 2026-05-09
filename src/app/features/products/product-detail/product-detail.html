@@ -18,7 +18,20 @@
     <div class="info-section">
       <nav class="breadcrumb">Products / {{ p.category.name }}</nav>
       <h1>{{ p.title }}</h1>
-      <div class="rating">⭐ {{ p.rating }} (Review Score)</div>
+
+<div class="rating-section">
+  <h4>Rate this product:</h4>
+  <div class="interactive-stars">
+  @for (star of [1, 2, 3, 4, 5]; track star) {
+    <span class="star-icon" 
+          [class.filled]="star <= (userSelectedRating() || product()?.rating)"
+          (click)="submitRating(star)">
+      ★
+    </span>
+  }
+</div>
+  <p class="current-rate">Current Avg: {{ product()?.rating }} / 5</p>
+</div>
 
       <div class="price-box">
         <span class="current-price">{{ p.price.current | currency:'USD' }}</span>

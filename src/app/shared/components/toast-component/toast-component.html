@@ -1,0 +1,13 @@
+@if (toastService.toast(); as t) {
+  <div class="toast-container" [ngClass]="t.type">
+    <div class="toast-content">
+      <i class="fa-solid toast-icon" [ngClass]="{
+        'fa-circle-check': t.type === 'success',
+        'fa-circle-xmark': t.type === 'error',
+        'fa-circle-info': t.type === 'info'
+      }"></i>
+      
+      <span class="toast-message">{{ t.message }}</span>
+    </div>
+  </div>
+}

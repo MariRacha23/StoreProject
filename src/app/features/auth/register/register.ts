@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { Auth } from '../../../core/auth/auth';
+import { ToastService } from '../../../shared/services/toastService';
 
 @Component({
   selector: 'app-register',
@@ -12,6 +13,7 @@ import { Auth } from '../../../core/auth/auth';
 export class Register {
 private authService = inject(Auth);
   private router = inject(Router);
+  private toastService = inject(ToastService);
 
  public registerForm = new FormGroup({
     firstName: new FormControl('', Validators.required),
@@ -30,10 +32,10 @@ private authService = inject(Auth);
     if (this.registerForm.valid) {
       this.authService.signUp(this.registerForm.value).subscribe({
         next: (data: any) => {
-          alert("Registration successful!");
+          this.toastService.show('Registration successful!', 'success');
           this.router.navigate(['/auth/login']);
         },
-        error: (err: any) => alert("Registration failed!")
+        error: (err: any) => this.toastService.show('Registration failed!', 'error')
       });
     }
   }

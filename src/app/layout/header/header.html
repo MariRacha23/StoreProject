@@ -5,8 +5,12 @@
         </div>
 
         <nav class="nav-links">
-            <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a>
-            <a routerLink="/products" routerLinkActive="active">Products</a>
+            <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+                {{ 'NAV.HOME' | translate }}
+            </a>
+            <a routerLink="/products" routerLinkActive="active">
+                {{ 'NAV.PRODUCTS' | translate }}
+            </a>
         </nav>
 
         <div class="header-actions">
@@ -17,17 +21,30 @@
                         class="nav-avatar" alt="User">
                     <span>{{ authService.currentUser()?.firstName }}</span>
                 </div>
-                <button class="btn-logout" (click)="logout()">Logout</button>
+                <button class="btn-logout" (click)="logout()">
+                    {{ 'NAV.LOGOUT' | translate }}
+                </button>
                 } @else {
-                <button class="btn-login" routerLink="/auth/login">Login</button>
-                <button class="btn-register" routerLink="/auth/register">Register</button>
+                <button class="btn-login" routerLink="/auth/login">
+                    {{ 'NAV.LOGIN' | translate }}
+                </button>
+                <button class="btn-register" routerLink="/auth/register">
+                    {{ 'NAV.REGISTER' | translate }}
+                </button>
                 }
             </div>
 
             <div class="cart-wrapper" routerLink="/cart">
-                <i class="fa-solid fa-cart-shopping"></i>
-                <span class="cart-count">{{ cartCount ()}}</span>
+                <img src="img/image.png" alt="Cart" class="cart-icon-img">
+                @if (cartCount() > 0) {
+                <span class="cart-count">{{ cartCount() }}</span>
+                }
             </div>
+        </div>
+
+        <div class="lang-container">
+            <button (click)="langService.changeLang('ka')" [class.active]="langService.currentLang() === 'ka'">KA</button>
+            <button (click)="langService.changeLang('en')" [class.active]="langService.currentLang() === 'en'">EN</button>
         </div>
     </div>
 </header>

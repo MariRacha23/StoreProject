@@ -2,6 +2,8 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Auth } from '../../../core/auth/auth';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { ToastService } from '../../../shared/services/toastService';
 
 @Component({
   selector: 'app-profile',
@@ -10,17 +12,24 @@ import { CommonModule } from '@angular/common';
   styleUrl: './profile.css',
 })
 export class Profile implements OnInit {
+  
   private authService = inject(Auth);
-
+  private router = inject(Router);
   public isEditing = signal(false);
   public message = signal<{ text: string; type: 'success' | 'error' } | null>(null);
+public toastService = inject(ToastService);
+
 
   public profileForm = new FormGroup({
     firstName: new FormControl('', Validators.required),
     lastName: new FormControl('', Validators.required),
+    age: new FormControl(0, [Validators.required, Validators.min(1)]),
     phone: new FormControl('', Validators.required),
     email: new FormControl({ value: '', disabled: true }),
     address: new FormControl('', Validators.required),
+    zipcode: new FormControl('', Validators.required),
+    avatar: new FormControl(''),
+    gender: new FormControl('MALE'), 
   });
 
   public passwordForm = new FormGroup({
@@ -33,7 +42,7 @@ export class Profile implements OnInit {
       next: (user) => {
         this.profileForm.patchValue(user);
       },
-      error: (err) => console.error('შეცდომა მონაცემების წამოღებისას:', err),
+      error: (err) => console.error('Error fetching info::', err),
     });
   }
 
@@ -65,9 +74,32 @@ export class Profile implements OnInit {
   const email = this.profileForm.getRawValue().email;
   if (email) {
     this.authService.recoveryPassword(email as string).subscribe({
-      next: () => alert('Recovery email sent!'),
-      error: () => alert('Error!')
+      next: () => this.toastService.show('Recovery email sent!', 'success'),
+      error: () => this.toastService.show('Error!', 'error')
     });
   }
 }
+
+deleteMyAccount() {
+  if (confirm('Are you sure you want to delete your account? This action cannot be undone! 😱')) {
+    this.authService.deleteAccount().subscribe({
+      next: () => {
+       this.toastService.show('Account deleted successfully. We will miss you!', 'info');
+        this.router.navigate(['/auth/login']);
+      },
+      error: (err) => {
+        this.toastService.show('Failed to delete account. Please try again.', 'error');
+        console.error(err);
+      }
+    });
+  }
+}
+
+logout() {
+  this.authService.singOut().subscribe({
+    next: () => this.router.navigate(['/auth/login'])
+  });
+}
+
+
 }

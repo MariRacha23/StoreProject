@@ -6,82 +6,110 @@
   </div>
 </section>
 
-<div class="search-filters-container container">
-  <div class="filter-group main-search">
-    <i class="search-icon">🔍</i>
-    <input 
-      type="text" 
-      [(ngModel)]="searchQuery" 
-      (input)="onSearch()" 
-      placeholder="Search product by name..."
-    >
-  </div>
+<div class="main-layout container" id="products-section">
 
-  <div class="filter-group price-filters">
-    <input 
-      type="number" 
-      [(ngModel)]="minPrice" 
-      (input)="onSearch()" 
-      placeholder="Min Price"
-    >
-    <span class="divider">-</span>
-    <input 
-      type="number" 
-      [(ngModel)]="maxPrice" 
-      (input)="onSearch()" 
-      placeholder="Max Price"
-    >
-  </div>
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h3>Filters</h3>
+    </div>
 
-  <div class="filter-group rating-filter">
-    <select [(ngModel)]="rating" (change)="onSearch()">
-      <option [ngValue]="undefined">All Ratings</option>
-      <option [ngValue]="4">4+ Stars</option>
-      <option [ngValue]="3">3+ Stars</option>
-      <option [ngValue]="5">5 Stars only</option>
-    </select>
-  </div>
+    <div class="filter-group">
+      <h4>Search</h4>
+      <div class="input-wrapper">
+        <input type="text" (input)="onSearchInput($event)" placeholder="Product name...">
+      </div>
+    </div>
+
+   <div class="filter-group">
+  <h4>Category</h4>
+  <ul class="category-list">
+    <li [class.active]="!selectedCategory()" (click)="filterByCategory(undefined)">
+      All Categories
+    </li>
+    @for (cat of categories(); track cat.id) {
+      <li [class.active]="selectedCategory() === cat.id" 
+          (click)="filterByCategory(cat.id)">
+        {{ cat.name }}
+      </li>
+    }
+  </ul>
 </div>
 
-<div class="container" id="products-section">
-  <h2 class="section-title">
-    {{ searchQuery() ? 'Search Results' : 'New Arrivals' }}
-  </h2>
+  <div class="filter-group">
+  <h4>Brand</h4>
+  <select class="sidebar-select" (change)="filterByBrand($any($event.target).value)">
+    <option value="">All Brands</option>
+    @for (brand of brands(); track brand) {
+      <option [value]="brand">{{ brand | titlecase }}</option>
+    }
+  </select>
+</div>
+
+    <div class="filter-group">
+      <h4>Price Range</h4>
+      <div class="price-inputs">
+        <input type="number" (input)="onPriceChange($event, 'min')" placeholder="Min">
+        <input type="number" (input)="onPriceChange($event, 'max')" placeholder="Max">
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <h4>Rating</h4>
+      <select class="sidebar-select" [(ngModel)]="rating" (change)="loadData(1)">
+        <option [ngValue]="undefined">All Ratings</option>
+        <option [ngValue]="4">4+ Stars</option>
+        <option [ngValue]="5">5 Stars</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <h4>Sort By</h4>
+      <select class="sidebar-select" (change)="onSortChange($event)">
+        <option value="">Default Sorting</option>
+        <option value="price_asc">Price: Low to High</option>
+        <option value="price_desc">Price: High to Low</option>
+        <option value="rating_desc">Best Rated</option>
+      </select>
+    </div>
+  </aside>
+
+  <section class="products-content">
+    <h2 class="section-title">
+      {{ searchQuery() ? 'Search Results' : 'New Arrivals' }}
+    </h2>
 
   <div class="products-grid">
-    @for (product of products(); track product._id) {
-      <div class="product-card slide-in">
-        <div class="image-wrapper" [routerLink]="['/product', product._id]">
-          <img [src]="product.thumbnail" [alt]="product.title">
-        </div>
-
-        <div class="card-info">
-          <h3>{{ product.title }}</h3>
-          <div class="rating">⭐ {{ product.rating }}</div>
-          <div class="price-tag">
-            {{ product.price.current | currency:'USD' }}
-          </div>
-          <button class="add-to-cart-btn" (click)="addToCart($event, product)">
-            Add to Cart
-          </button>
-        </div>
-      </div>
-    } @empty {
-      <div class="no-results">
-        <p>No products found matching your criteria 😕</p>
-      </div>
-    }
-  </div>
-
-  @if (!searchQuery()) {
-    <div class="pagination-controls">
-      <button class="pag-btn" [disabled]="currentPage() === 1" (click)="loadPage(currentPage() - 1)">
-        Previous
-      </button>
-      <span class="page-info">Page {{ currentPage() }} of {{ totalPages() }}</span>
-      <button class="pag-btn" [disabled]="currentPage() === totalPages()" (click)="loadPage(currentPage() + 1)">
-        Next
-      </button>
+  @for (product of products(); track product._id) {
+    <div class="product-card slide-in" [class.is-sold-out]="product.stock === 0">
+  
+  @if (product.stock === 0) {
+    <div class="sold-out-overlay">
+      <span>SOLD OUT</span>
     </div>
   }
+
+  <div class="image-wrapper" [routerLink]="['/product', product._id]">
+    <img [src]="product.thumbnail | imageFallback:product.category.name" [alt]="product.title">
+  </div>
+
+  <div class="card-info">
+    <h3>{{ product.title }}</h3>
+    
+    <button 
+      class="add-to-cart-btn" 
+      (click)="addToCart($event, product)"
+      [disabled]="product.stock === 0">
+      {{ product.stock === 0 ? 'Out of Stock' : 'Add to Cart' }}
+    </button>
+  </div>
+</div>
+  } 
+  </div>
+
+    <div class="pagination-controls">
+      <button class="pag-btn" [disabled]="currentPage() === 1" (click)="loadData(currentPage() - 1)">Previous</button>
+      <span class="page-info">Page {{ currentPage() }} of {{ totalPages() }}</span>
+      <button class="pag-btn" [disabled]="currentPage() === totalPages()" (click)="loadData(currentPage() + 1)">Next</button>
+    </div>
+  </section>
 </div>

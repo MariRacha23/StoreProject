@@ -1,0 +1,9 @@
+{
+  "NAV": {
+    "HOME": "Home",
+    "PRODUCTS": "Products",
+    "LOGOUT": "Logout",
+    "LOGIN": "Login",
+    "REGISTER": "Register"
+  }
+}

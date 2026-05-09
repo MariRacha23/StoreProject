@@ -4,10 +4,12 @@ import { Router, RouterModule } from '@angular/router';
 import { Auth } from '../../core/auth/auth';
 import { CartService } from '../../core/services/cart.service';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../shared/services/language.service';
 
 @Component({
   selector: 'app-header',
-  imports: [RouterModule, CommonModule],
+  imports: [RouterModule, CommonModule,TranslateModule],
   templateUrl: './header.html',
   styleUrl: './header.css',
 })
@@ -16,6 +18,7 @@ export class Header implements OnInit {
   private router = inject(Router);
   private cartService = inject(CartService);
   public cartCount = toSignal(this.cartService.cartCount$, { initialValue: 0 });
+public langService = inject(LanguageService);
 
   ngOnInit() {
     this.cartService.updateCartCount();

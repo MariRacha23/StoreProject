@@ -4,6 +4,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ProductService } from '../../../core/services/product-service';
 import { switchMap } from 'rxjs';
 import { CartService } from '../../../core/services/cart.service';
+import { ToastService } from '../../../shared/services/toastService';
 
 @Component({
   selector: 'app-product-detail',
@@ -16,31 +17,30 @@ export class ProductDetail implements OnInit {
   private productService = inject(ProductService);
   private router = inject(Router);
   private cartService = inject(CartService);
+  private toastService = inject(ToastService);
 
   public product = signal<any>(null);
   public selectedImage = signal<string>('');
   public quantity = signal<number>(1);
   public errorMessage = false;
+  public userSelectedRating = signal<number>(0);
 
   addToCart() {
     const currentProduct = this.product();
-    console.log('Full Product Object:', currentProduct);
 
     if (currentProduct) {
       const id = currentProduct._id || currentProduct.id;
       const qty = this.quantity();
-
-      if (!id) {
-        console.error('ID is missing!');
-        return;
-      }
-
       this.cartService.addToCart(id, qty).subscribe({
         next: (res: any) => {
-          alert('Product added! 🛒');
+          this.toastService.show('Product added to cart! 🛒', 'success');
           this.router.navigate(['/cart']);
         },
-        error: (err: any) => alert('Error: ' + err.status),
+        error: (err: any) => {
+          console.error('Cart Error:', err);
+          this.toastService.show('You need to be registered to add products to the cart.', 'error');
+          this.router.navigate(['/auth/register']);
+        },
       });
     }
   }
@@ -77,5 +77,28 @@ export class ProductDetail implements OnInit {
     if (newQty >= 1 && newQty <= maxStock) {
       this.quantity.set(newQty);
     }
+  }
+
+  submitRating(rating: number) {
+    const currentProduct = this.product();
+    if (!currentProduct) return;
+
+    this.productService.rateProduct(currentProduct._id, rating).subscribe({
+      next: (res) => {
+        console.log('Server Response:', res);
+        this.userSelectedRating.set(rating);
+        this.toastService.show('Thank you! Your rating has been submitted successfully. ⭐', 'success');
+      },
+      error: (err) => {
+        console.log('Error details:', err);
+
+        if (err.status === 401 || err.status === 400) {
+          this.toastService.show('Please login or register to rate this product.', 'error');
+          this.router.navigate(['/auth/register']);
+        } else {
+          this.toastService.show('Failed to submit rating. Please try again later.', 'error');
+        }
+      },
+    });
   }
 }

@@ -23,33 +23,33 @@ export class Cart implements OnInit {
   refreshCart() {
     this.cartService.getCart().subscribe({
       next: (res) => {
-        if (!res.products || res.products.length === 0) {
-          this.cartData.set(res);
+        if (!res || !res.products || res.products.length === 0) {
+          this.cartData.set({ products: [] });
           return;
         }
 
         const requests = res.products.map((item: any) => {
           return this.ProductService.getProductById(item.productId).pipe(
-            map((fullProduct) => {
-              return {
-                ...item,
-                product: fullProduct,
-              };
-            }),
+            map((fullProduct) => ({
+              ...item,
+              product: fullProduct,
+            })),
           );
         });
 
-        forkJoin(requests).subscribe((enrichedProducts) => {
-          this.cartData.set({
-            ...res,
-            products: enrichedProducts,
-          });
-          console.log('Enriched Cart Content:', enrichedProducts);
+        forkJoin(requests).subscribe({
+          next: (enrichedProducts) => {
+            this.cartData.set({
+              ...res,
+              products: enrichedProducts,
+            });
+            console.log('Cart updated successfully');
+          },
+          error: (err) => console.error('Error enriching products:', err),
         });
       },
       error: (err) => {
-        console.error('Error loading cart:', err);
-        this.cartData.set(null);
+        console.error('Cart fetch failed:', err);
       },
     });
   }
@@ -66,5 +66,38 @@ export class Cart implements OnInit {
       },
       error: (err) => console.error('Delete error:', err),
     });
+  }
+
+  changeQuantity(productId: string, currentQty: number, delta: number) {
+    const newQty = currentQty + delta;
+    if (newQty < 1) return;
+
+    console.log('Sending update for:', productId, 'New Qty:', newQty);
+
+    this.cartService.updateQuantity(productId, newQty).subscribe({
+      next: () => {
+        this.refreshCart();
+        this.cartService.updateCartCount();
+      },
+      error: (err) => console.error('Update failed:', err),
+    });
+  }
+
+  onCheckout() {
+    if (confirm('Are you sure you want to complete the purchase?')) {
+      this.cartService.checkout().subscribe({
+        next: () => {
+          alert('Thank you for your purchase! 🛍️');
+
+          this.cartData.set({ products: [] });
+
+          this.cartService.updateCartCount();
+        },
+        error: (err) => {
+          console.error('Checkout failed:', err);
+          alert('Checkout failed. Please try again.');
+        },
+      });
+    }
   }
 }

@@ -64,4 +64,17 @@ export class CartService {
       },
     });
   }
+
+ updateQuantity(productId: string, quantity: number): Observable<any> {
+    const body = {
+      id: productId,
+      quantity: Number(quantity)
+    };
+    return this.http.patch(`${this.apiUrl}/product`, body, { headers: this.getHeaders() });
+  }
+
+  checkout(): Observable<any> {
+
+ return this.http.post(`${this.apiUrl}/checkout`, {}, { headers: this.getHeaders() });
+  }
 }

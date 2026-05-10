@@ -17,6 +17,9 @@
     },
     "FILTERS": {
       "TITLE": "Filters",
+      "RECENTLY_VIEWED": "Recently Viewed Products",
+      "SHOW_ALL": "Show All Products",
+      "MY_HISTORY": "My Viewed Products",
       "SEARCH": "Search",
       "SEARCH_PLACEHOLDER": "Product name...",
       "CATEGORY": "Category",

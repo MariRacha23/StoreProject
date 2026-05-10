@@ -10,15 +10,20 @@ export class LanguageService {
 public currentLang = signal('en');
 
  constructor() {
-  const translate = inject(TranslateService); 
-  translate.addLangs(['en', 'ka']);
-  translate.setDefaultLang('en');
-  translate.use('en');
-}
+  this.translate.addLangs(['en', 'ka']);
+    this.translate.setDefaultLang('en');
+    
+    const savedLang = localStorage.getItem('lang') as 'en' | 'ka';
+    const finalLang = savedLang || 'en';
+    
+    this.translate.use(finalLang);
+    this.currentLang.set(finalLang);
+  }
 
   changeLang(lang: 'en' | 'ka') {
     this.translate.use(lang).subscribe(() => {
       this.currentLang.set(lang);
+      localStorage.setItem('lang', lang); 
     });
   }
 }

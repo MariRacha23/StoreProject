@@ -17,11 +17,16 @@ export class Header implements OnInit {
   public authService = inject(Auth);
   private router = inject(Router);
   private cartService = inject(CartService);
+  public langService = inject(LanguageService);
+
   public cartCount = toSignal(this.cartService.cartCount$, { initialValue: 0 });
-public langService = inject(LanguageService);
+
 
   ngOnInit() {
     this.cartService.updateCartCount();
+  }
+  switchLanguage(lang: 'en' | 'ka') {
+    this.langService.changeLang(lang);
   }
 
   logout() {

@@ -5,6 +5,7 @@ import { ProductService } from '../../../core/services/product-service';
 import { switchMap } from 'rxjs';
 import { CartService } from '../../../core/services/cart.service';
 import { ToastService } from '../../../shared/services/toastService';
+import { Product } from '../../../shared/models/product.interface';
 
 @Component({
   selector: 'app-product-detail',
@@ -59,6 +60,8 @@ export class ProductDetail implements OnInit {
           this.product.set(res);
           this.selectedImage.set(res.thumbnail);
           this.errorMessage = false;
+
+          this.addToRecentlyViewed(res);
         },
         error: (err) => {
           console.error('Fetch Error:', err);
@@ -87,7 +90,10 @@ export class ProductDetail implements OnInit {
       next: (res) => {
         console.log('Server Response:', res);
         this.userSelectedRating.set(rating);
-        this.toastService.show('Thank you! Your rating has been submitted successfully. ⭐', 'success');
+        this.toastService.show(
+          'Thank you! Your rating has been submitted successfully. ⭐',
+          'success',
+        );
       },
       error: (err) => {
         console.log('Error details:', err);
@@ -100,5 +106,14 @@ export class ProductDetail implements OnInit {
         }
       },
     });
+  }
+
+  addToRecentlyViewed(product: Product) {
+    const viewed = JSON.parse(sessionStorage.getItem('recentlyViewed') || '[]');
+    const filtered = viewed.filter((p: any) => p._id !== product._id);
+
+    filtered.unshift(product);
+    const limited = filtered.slice(0, 5);
+    sessionStorage.setItem('recentlyViewed', JSON.stringify(limited));
   }
 }

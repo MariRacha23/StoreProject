@@ -41,6 +41,13 @@ export class ProductsListComponent implements OnInit {
   public categories = signal<any[]>([]);
   public brands = signal<string[]>([]);
 
+  public recentlyViewed = signal<Product[]>([]);
+
+  public showRecentlyViewed = signal<boolean>(false);
+
+  public isChatOpen = signal(false);
+public messages = signal<{role: string, content: string}[]>([]);
+
   protected Math = Math;
 
   private searchSubject = new Subject<string>();
@@ -48,6 +55,7 @@ export class ProductsListComponent implements OnInit {
   ngOnInit(): void {
     this.fetchCategories();
     this.fetchBrands();
+    this.loadRecentlyViewed();
     this.searchSubject.pipe(debounceTime(500), distinctUntilChanged()).subscribe((value) => {
       this.searchQuery.set(value);
       this.loadData(1);
@@ -199,4 +207,28 @@ export class ProductsListComponent implements OnInit {
       },
     });
   }
+
+  loadRecentlyViewed() {
+    const data = sessionStorage.getItem('recentlyViewed');
+    console.log('Session Data:', data);
+    if (data) {
+      this.recentlyViewed.set(JSON.parse(data));
+    }
+  }
+
+  toggleRecentlyViewed(show: boolean) {
+    this.showRecentlyViewed.set(show);
+  }
+
+  toggleChat() {
+  this.isChatOpen.set(!this.isChatOpen());
+}
+
+sendMessage(text: string) {
+  if (!text.trim()) return;
+  
+  this.messages.update(prev => [...prev, { role: 'user', content: text }]); 
+}
+
+
 }

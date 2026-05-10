@@ -15,6 +15,14 @@
     </div>
 
     <div class="filter-group">
+      <button class="view-history-btn" [class.active]="showRecentlyViewed()"
+        (click)="toggleRecentlyViewed(!showRecentlyViewed())">
+        <i class="fas fa-history"></i> {{ (showRecentlyViewed() ? 'HOME.FILTERS.SHOW_ALL' : 'HOME.FILTERS.MY_HISTORY') |
+        translate }}
+      </button>
+    </div>
+
+    <div class="filter-group">
       <h4>{{ 'HOME.FILTERS.SEARCH' | translate }}</h4>
       <div class="input-wrapper">
         <input type="text" (input)="onSearchInput($event)"
@@ -77,11 +85,17 @@
 
   <section class="products-content">
     <h2 class="section-title">
+      @if (showRecentlyViewed()) {
+      {{ 'HOME.FILTERS.RECENTLY_VIEWED' | translate }}
+      } @else {
       {{ searchQuery() ? ('HOME.PRODUCTS.SEARCH_RESULTS' | translate) : ('HOME.PRODUCTS.NEW_ARRIVALS' | translate) }}
+      }
     </h2>
 
     <div class="products-grid">
-      @for (product of products(); track product._id) {
+      @let displayList = showRecentlyViewed() ? recentlyViewed() : products();
+
+      @for (product of displayList; track product._id) {
       <div class="product-card slide-in" [class.is-sold-out]="product.stock === 0">
 
         @if (product.stock === 0) {
@@ -114,9 +128,14 @@
           </button>
         </div>
       </div>
+      } @empty {
+      <div class="empty-state">
+        <p>{{ showRecentlyViewed() ? 'No recently viewed products' : 'No products found' }}</p>
+      </div>
       }
     </div>
 
+    @if (!showRecentlyViewed()) {
     <div class="pagination-controls">
       <button class="pag-btn" [disabled]="currentPage() === 1" (click)="loadData(currentPage() - 1)">
         {{ 'HOME.PRODUCTS.PREVIOUS' | translate }}
@@ -129,5 +148,37 @@
         {{ 'HOME.PRODUCTS.NEXT' | translate }}
       </button>
     </div>
+    }
   </section>
+
+<div class="ai-chat-container" [class.open]="isChatOpen()">
+  
+  @if (isChatOpen()) {
+    <div class="chat-window">
+      <div class="chat-header">
+        <span>Claude AI Assistant</span>
+        <button (click)="toggleChat()">×</button>
+      </div>
+      <div class="chat-messages" #scrollMe>
+        @for (msg of messages(); track $index) {
+          <div [class]="'message ' + msg.role">
+            {{ msg.content }}
+          </div>
+        }
+      </div>
+      <div class="chat-input">
+        <input #chatInput (keyup.enter)="sendMessage(chatInput.value); chatInput.value = ''" 
+               placeholder="Ask about products...">
+      </div>
+    </div>
+  }
+
+  <button class="chat-bubble" (click)="toggleChat()">
+  @if (!isChatOpen()) {
+    <i class="fas fa-comment-dots"></i> } @else {
+    <i class="fas fa-times"></i> }
+</button>
+</div>
+
+
 </div>

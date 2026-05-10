@@ -42,9 +42,16 @@
             </div>
         </div>
 
-        <div class="lang-container">
-            <button (click)="langService.changeLang('ka')" [class.active]="langService.currentLang() === 'ka'">KA</button>
-            <button (click)="langService.changeLang('en')" [class.active]="langService.currentLang() === 'en'">EN</button>
-        </div>
+    <div class="language-switcher">
+  <button (click)="switchLanguage('ka')" 
+          [class.active]="langService.currentLang() === 'ka'">
+    <span class="fi fi-ge"></span> ქართული
+  </button>
+
+  <button (click)="switchLanguage('en')" 
+          [class.active]="langService.currentLang() === 'en'">
+    <span class="fi fi-gb"></span> English
+  </button>
+</div>
     </div>
 </header>

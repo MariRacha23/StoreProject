@@ -5,5 +5,48 @@
     "LOGOUT": "Logout",
     "LOGIN": "Login",
     "REGISTER": "Register"
+  },
+
+
+
+  "HOME": {
+    "HERO": {
+      "TITLE": "Discover Future Tech",
+      "SUBTITLE": "Best deals on Laptops, Smartphones, and Accessories",
+      "SHOP_NOW": "Shop Now"
+    },
+    "FILTERS": {
+      "TITLE": "Filters",
+      "SEARCH": "Search",
+      "SEARCH_PLACEHOLDER": "Product name...",
+      "CATEGORY": "Category",
+      "ALL_CATEGORIES": "All Categories",
+      "BRAND": "Brand",
+      "ALL_BRANDS": "All Brands",
+      "PRICE_RANGE": "Price Range",
+      "MIN": "Min",
+      "MAX": "Max",
+      "RATING": "Rating",
+      "ALL_RATINGS": "All Ratings",
+      "SORT_BY": "Sort By",
+      "DEFAULT_SORT": "Default Sorting",
+      "PRICE_ASC": "Price: Low to High",
+      "PRICE_DESC": "Price: High to Low",
+      "BEST_RATED": "Best Rated",
+      "RATING_3_PLUS": "3+ Stars",
+      "RATING_4_PLUS": "4+ Stars",
+      "RATING_5": "5 Stars"
+    },
+    "PRODUCTS": {
+      "SEARCH_RESULTS": "Search Results",
+      "NEW_ARRIVALS": "New Arrivals",
+      "SOLD_OUT": "SOLD OUT",
+      "OUT_OF_STOCK": "Out of Stock",
+      "ADD_TO_CART": "Add to Cart",
+      "PREVIOUS": "Previous",
+      "NEXT": "Next",
+      "PAGE": "Page",
+      "OF": "of"
+    }
   }
 }

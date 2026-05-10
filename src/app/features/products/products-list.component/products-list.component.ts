@@ -8,10 +8,11 @@ import { ImageFallbackPipe } from '../../../shared/pipes/image-fallback-pipe';
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 import { CartService } from '../../../core/services/cart.service';
 import { ToastService } from '../../../shared/services/toastService';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-products-list.component',
-  imports: [CommonModule, RouterModule, FormsModule, ImageFallbackPipe],
+  imports: [CommonModule, RouterModule, FormsModule, ImageFallbackPipe, TranslateModule],
   templateUrl: './products-list.component.html',
   styleUrl: './products-list.component.css',
 })
@@ -40,6 +41,8 @@ export class ProductsListComponent implements OnInit {
   public categories = signal<any[]>([]);
   public brands = signal<string[]>([]);
 
+  protected Math = Math;
+
   private searchSubject = new Subject<string>();
 
   ngOnInit(): void {
@@ -49,25 +52,22 @@ export class ProductsListComponent implements OnInit {
       this.searchQuery.set(value);
       this.loadData(1);
     });
-    this.loadData(); 
+    this.loadData();
   }
 
-
-private fetchCategories(): void {
+  private fetchCategories(): void {
     this.productService.getCategories().subscribe({
       next: (data) => this.categories.set(data),
-      error: (err) => console.error('Error fetching categories:', err)
+      error: (err) => console.error('Error fetching categories:', err),
     });
   }
 
   private fetchBrands(): void {
     this.productService.getBrands().subscribe({
       next: (data) => this.brands.set(data),
-      error: (err) => console.error('Error fetching brands:', err)
+      error: (err) => console.error('Error fetching brands:', err),
     });
   }
-
-
 
   onSearchInput(event: any) {
     this.searchSubject.next(event.target.value);
@@ -89,14 +89,15 @@ private fetchCategories(): void {
   loadData(page: number = 1) {
     this.currentPage.set(page);
 
+    const currentSize = this.rating() ? 50 : 9;
     this.productService
       .searchProducts(
         this.searchQuery(),
         page,
-        this.pageSize,
+        currentSize,
         this.minPrice(),
         this.maxPrice(),
-        this.rating(),
+        undefined,
         this.selectedCategory(),
         this.selectedBrand(),
         this.sortBy(),
@@ -104,9 +105,28 @@ private fetchCategories(): void {
       )
       .subscribe({
         next: (res: any) => {
-          const results = res.products ? res.products : res;
+          let results = res.products ? res.products : res;
+
+          const filterVal = this.rating();
+          if (filterVal) {
+            results = results.filter((p: any) => {
+              const displayedRating = Math.round(p.rating * 10) / 10;
+              const rating = Number(displayedRating);
+
+              if (filterVal === 3) {
+                return rating >= 3 && rating < 4;
+              }
+              if (filterVal === 4) {
+                return rating >= 4 && rating < 5;
+              }
+              if (filterVal === 5) {
+                return rating >= 5;
+              }
+              return true;
+            });
+          }
           this.products.set(results);
-          this.totalProducts.set(res.total || 0);
+          this.totalProducts.set(res.total || results.length);
         },
         error: (err) => console.error('Error:', err),
       });
@@ -144,6 +164,18 @@ private fetchCategories(): void {
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+  }
+
+  onRatingChange(event: any) {
+    const value = event.target.value;
+
+    if (value === '') {
+      this.rating.set(undefined);
+    } else {
+      this.rating.set(Number(value));
+    }
+
+    this.loadData(1);
   }
 
   addToCart(event: Event, product: Product) {

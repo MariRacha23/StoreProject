@@ -40,7 +40,9 @@ export class ProductService {
 
     if (minPrice) params = params.set('price_min', minPrice.toString());
     if (maxPrice) params = params.set('price_max', maxPrice.toString());
-    if (rating) params = params.set('rating', rating.toString());
+    if (rating !== undefined && rating !== null) {
+      params = params.set('rating', rating.toString());
+    }
     if (category_id) params = params.set('category_id', category_id);
     if (brand) params = params.set('brand', brand.toLowerCase());
     if (sortBy) params = params.set('sort_by', sortBy);

@@ -414,3 +414,67 @@
 .chat-bubble:hover i {
   transform: scale(1.2);
 }
+
+.chat-messages {
+  overflow-x: hidden; 
+  word-wrap: break-word; 
+}
+
+.chat-messages img {
+  max-width: 150px;
+  border-radius: 8px;
+  display: block;
+  margin: 10px 0;
+}
+
+.chat-messages strong {
+  color: #00ffcc;
+  font-size: 1.1em;
+}
+
+.product-price-display {
+  margin: 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.current-price {
+  color: #00ffcc;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.old-price {
+  color: #888;
+  text-decoration: line-through;
+  font-size: 0.9rem;
+}
+
+.is-sold-out .image-wrapper img {
+  filter: grayscale(100%);
+  opacity: 0.6;
+}
+
+.sold-out-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-15deg);
+  background: rgba(255, 68, 68, 0.9);
+  color: white;
+  padding: 5px 15px;
+  font-weight: bold;
+  border: 2px solid white;
+  z-index: 2;
+  white-space: nowrap;
+}
+
+.message.assistant {
+  white-space: pre-wrap;
+  max-width: 100%;
+}
+
+.message a {
+  word-break: break-all;
+}

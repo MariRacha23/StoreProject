@@ -98,18 +98,26 @@
       @for (product of displayList; track product._id) {
       <div class="product-card slide-in" [class.is-sold-out]="product.stock === 0">
 
-        @if (product.stock === 0) {
-        <div class="sold-out-overlay">
-          <span>{{ 'HOME.PRODUCTS.SOLD_OUT' | translate }}</span>
-        </div>
-        }
-
         <div class="image-wrapper" [routerLink]="['/product', product._id]">
           <img [src]="product.thumbnail | imageFallback:product.category.name" [alt]="product.title">
+
+          @if (product.stock === 0) {
+          <div class="sold-out-overlay">
+            <span>{{ 'HOME.PRODUCTS.SOLD_OUT' | translate }}</span>
+          </div>
+          }
         </div>
 
         <div class="card-info">
           <h3>{{ product.title }}</h3>
+
+          <div class="product-price-display">
+            <span class="current-price">{{ product.price.current | currency: product.price.currency }}</span>
+
+            @if (product.price.beforeDiscount > product.price.current) {
+            <span class="old-price">{{ product.price.beforeDiscount | currency: product.price.currency }}</span>
+            }
+          </div>
 
           <div class="product-rating-display">
             <div class="stars-row">
@@ -151,9 +159,9 @@
     }
   </section>
 
-<div class="ai-chat-container" [class.open]="isChatOpen()">
-  
-  @if (isChatOpen()) {
+  <div class="ai-chat-container" [class.open]="isChatOpen()">
+
+    @if (isChatOpen()) {
     <div class="chat-window">
       <div class="chat-header">
         <span>Claude AI Assistant</span>
@@ -161,24 +169,24 @@
       </div>
       <div class="chat-messages" #scrollMe>
         @for (msg of messages(); track $index) {
-          <div [class]="'message ' + msg.role">
-            {{ msg.content }}
-          </div>
+        <div [class]="'message ' + msg.role" style="white-space: pre-wrap;">
+          {{ msg.content }}
+        </div>
         }
       </div>
       <div class="chat-input">
-        <input #chatInput (keyup.enter)="sendMessage(chatInput.value); chatInput.value = ''" 
-               placeholder="Ask about products...">
+        <input #chatInput (keyup.enter)="sendMessage(chatInput.value); chatInput.value = ''"
+          placeholder="Ask about products...">
       </div>
     </div>
-  }
+    }
 
-  <button class="chat-bubble" (click)="toggleChat()">
-  @if (!isChatOpen()) {
-    <i class="fas fa-comment-dots"></i> } @else {
-    <i class="fas fa-times"></i> }
-</button>
-</div>
+    <button class="chat-bubble" (click)="toggleChat()">
+      @if (!isChatOpen()) {
+      <i class="fas fa-comment-dots"></i> } @else {
+      <i class="fas fa-times"></i> }
+    </button>
+  </div>
 
 
 </div>

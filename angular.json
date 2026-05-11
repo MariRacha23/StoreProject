@@ -59,7 +59,8 @@
               "buildTarget": "StoreProject:build:production"
             },
             "development": {
-              "buildTarget": "StoreProject:build:development"
+              "buildTarget": "StoreProject:build:development",
+              "proxyConfig": "./proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

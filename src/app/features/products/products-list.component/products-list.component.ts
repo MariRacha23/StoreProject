@@ -9,6 +9,7 @@ import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 import { CartService } from '../../../core/services/cart.service';
 import { ToastService } from '../../../shared/services/toastService';
 import { TranslateModule } from '@ngx-translate/core';
+import { Ai } from '../../../core/services/ai';
 
 @Component({
   selector: 'app-products-list.component',
@@ -22,6 +23,7 @@ export class ProductsListComponent implements OnInit {
   private cartService = inject(CartService);
   private router = inject(Router);
   private toastService = inject(ToastService);
+  private aiService = inject(Ai);
 
   public products = signal<Product[]>([]);
   public currentPage = signal(1);
@@ -46,7 +48,8 @@ export class ProductsListComponent implements OnInit {
   public showRecentlyViewed = signal<boolean>(false);
 
   public isChatOpen = signal(false);
-public messages = signal<{role: string, content: string}[]>([]);
+  public messages = signal<{ role: string; content: string }[]>([]);
+  public allProductsForAi = signal<Product[]>([]);
 
   protected Math = Math;
 
@@ -56,6 +59,11 @@ public messages = signal<{role: string, content: string}[]>([]);
     this.fetchCategories();
     this.fetchBrands();
     this.loadRecentlyViewed();
+    this.loadAllProductsForAi();
+    const savedMessages = sessionStorage.getItem('chat_history');
+    if (savedMessages) {
+      this.messages.set(JSON.parse(savedMessages));
+    }
     this.searchSubject.pipe(debounceTime(500), distinctUntilChanged()).subscribe((value) => {
       this.searchQuery.set(value);
       this.loadData(1);
@@ -76,6 +84,16 @@ public messages = signal<{role: string, content: string}[]>([]);
       error: (err) => console.error('Error fetching brands:', err),
     });
   }
+
+  private loadAllProductsForAi(): void {
+  this.productService.searchProducts('', 1, 50).subscribe({
+    next: (res: any) => {
+      const all = res.products ? res.products : res;
+      this.allProductsForAi.set(all);
+    },
+    error: (err) => console.error('AI Data Load Error:', err)
+  });
+}
 
   onSearchInput(event: any) {
     this.searchSubject.next(event.target.value);
@@ -221,14 +239,38 @@ public messages = signal<{role: string, content: string}[]>([]);
   }
 
   toggleChat() {
-  this.isChatOpen.set(!this.isChatOpen());
-}
+    this.isChatOpen.set(!this.isChatOpen());
+  }
 
-sendMessage(text: string) {
+ sendMessage(text: string) {
   if (!text.trim()) return;
-  
-  this.messages.update(prev => [...prev, { role: 'user', content: text }]); 
+
+  this.messages.update((prev) => [...prev, { role: 'user', content: text }]);
+  this.messages.update((prev) => [...prev, { role: 'assistant', content: 'ვფიქრობ... 🤔' }]);
+
+  this.aiService.askCloude(text, this.allProductsForAi()).subscribe({
+    next: (response: string) => {
+      this.messages.update((prev) => {
+        const newMsgs = [...prev];
+        newMsgs[newMsgs.length - 1] = { role: 'assistant', content: response };
+        sessionStorage.setItem('chat_history', JSON.stringify(newMsgs));
+        return newMsgs;
+      });
+      setTimeout(() => this.scrollToBottom(), 100);
+    },
+    error: (err) => {
+      this.messages.update((prev) => [
+        ...prev,
+        { role: 'assistant', content: 'კავშირი გაწყდა 📡' },
+      ]);
+    },
+  });
 }
 
-
+  scrollToBottom() {
+    const chatMsgs = document.querySelector('.chat-messages');
+    if (chatMsgs) {
+      chatMsgs.scrollTop = chatMsgs.scrollHeight;
+    }
+  }
 }

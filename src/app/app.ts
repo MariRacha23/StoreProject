@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { RouterModule, RouterOutlet } from '@angular/router';
 import { Header } from './layout/header/header';
 import { Footer } from './layout/footer/footer';
@@ -11,6 +11,14 @@ import { TranslateModule } from '@ngx-translate/core';
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
-export class App {
+export class App  implements OnInit {
   protected readonly title = signal('StoreProject');
+  ngOnInit(): void {
+  const savedTheme = sessionStorage.getItem('theme');
+  if (savedTheme === 'dark') {
+    document.body.classList.add('dark-theme');
+  } else {
+    document.body.classList.remove('dark-theme');
+  }
+}
 }

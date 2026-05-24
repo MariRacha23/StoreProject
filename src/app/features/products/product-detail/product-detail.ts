@@ -38,7 +38,6 @@ export class ProductDetail implements OnInit {
           this.router.navigate(['/cart']);
         },
         error: (err: any) => {
-          console.error('Cart Error:', err);
           this.toastService.show('You need to be registered to add products to the cart.', 'error');
           this.router.navigate(['/auth/register']);
         },
@@ -64,7 +63,7 @@ export class ProductDetail implements OnInit {
           this.addToRecentlyViewed(res);
         },
         error: (err) => {
-          console.error('Fetch Error:', err);
+          this.toastService.show('Fetch Error:', err);
           this.errorMessage = true;
         },
       });
@@ -88,7 +87,6 @@ export class ProductDetail implements OnInit {
 
     this.productService.rateProduct(currentProduct._id, rating).subscribe({
       next: (res) => {
-        console.log('Server Response:', res);
         this.userSelectedRating.set(rating);
         this.toastService.show(
           'Thank you! Your rating has been submitted successfully. ⭐',
@@ -96,7 +94,7 @@ export class ProductDetail implements OnInit {
         );
       },
       error: (err) => {
-        console.log('Error details:', err);
+        this.toastService.show('Error details:', err);
 
         if (err.status === 401 || err.status === 400) {
           this.toastService.show('Please login or register to rate this product.', 'error');

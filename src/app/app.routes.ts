@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { adminGuard } from './core/guards/admin-guard';
 
 export const routes: Routes = [
     {
@@ -24,6 +25,15 @@ export const routes: Routes = [
 {
   path: 'cart',
   loadComponent: () => import('./features/cart/cart').then(m => m.Cart) 
+},
+{ 
+  path: 'admin', 
+  loadComponent: () => import('./features/admin/admin').then(m => m.Admin),
+  canActivate: [adminGuard] 
+},
+{
+  path: 'compare',
+  loadComponent: () => import('./features/comparison/comparison').then(m => m.Comparison),
 },
     { path: '**', redirectTo: '' }
 ];

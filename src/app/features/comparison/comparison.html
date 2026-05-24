@@ -1,0 +1,92 @@
+<div class="compare-container container">
+  <div class="compare-header">
+    <h2 class="section-title">Product Comparison</h2>
+    
+    @if (compareService.items().length > 0) {
+      <button class="clear-all-btn" (click)="compareService.clearAll()">
+        <i class="fas fa-trash-alt"></i> Clear All
+      </button>
+    }
+  </div>
+
+  @if (compareService.items().length > 0) {
+    <div class="compare-grid-layout">
+      @for (item of compareService.items(); track item._id) {
+        <div class="compare-detail-card">
+          
+          <button class="remove-item-btn" (click)="compareService.removeFromCompare(item._id)" title="Remove">
+            <i class="fas fa-times"></i>
+          </button>
+
+          @if (item.price?.beforeDiscount && item.price.beforeDiscount > item.price.current) {
+            <span class="discount-tag">Sale</span>
+          }
+
+          <div class="product-image-box">
+            <img [src]="item.thumbnail" [alt]="item.title" onerror="this.src='assets/placeholder.png'">
+          </div>
+
+          <div class="product-info-content">
+            <div class="category-brand-line">
+              <span class="product-brand-tag">{{ item.brand | titlecase }}</span>
+              
+              @if (item.category?.name) {
+                <span class="product-category-tag">{{ item.category.name | titlecase }}</span>
+              }
+            </div>
+            
+            <h3 class="product-title-text">{{ item.title }}</h3>
+            
+            @if (item.rating) {
+              <div class="product-rating-badge">
+                <span class="star-icon">⭐</span>
+                <span class="rating-number">{{ item.rating }}</span>
+              </div>
+            }
+
+            @if (item.description) {
+              <p class="product-description-text">{{ item.description }}</p>
+            }
+
+            <div class="specs-wrapper">
+              <div class="spec-item">
+                <span class="spec-label">Availability:</span>
+                <span class="spec-value stock-status" [class.in-stock]="item.stock > 0">
+                  {{ item.stock > 0 ? 'In Stock' : 'Out of Stock' }}
+                </span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-label">Stock Limit:</span>
+                <span class="spec-value">{{ item.stock }} units</span>
+              </div>
+            </div>
+
+            <div class="product-price-section">
+              <span class="price-label">Price:</span>
+              <div class="price-display-wrapper">
+                <h2 class="current-price-display">{{ item.price?.current | currency }}</h2>
+                @if (item.price?.beforeDiscount && item.price.beforeDiscount > item.price.current) {
+                  <span class="old-price-display">{{ item.price.beforeDiscount | currency }}</span>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="product-card-action">
+            <button class="add-to-cart-btn" (click)="addToCart(item)">
+              <i class="fas fa-shopping-cart"></i> Add to Cart
+            </button>
+          </div>
+
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="empty-compare">
+      <div class="empty-icon">🔄</div>
+      <h3>Your comparison list is empty</h3>
+      <p>Add some products to compare their features and find the best fit for you.</p>
+      <button class="shop-now-btn" routerLink="/">Start Shopping</button>
+    </div>
+  }
+</div>

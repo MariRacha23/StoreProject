@@ -2,10 +2,11 @@ import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../shared/services/toastService';
+import { QrGenerator } from '../../features/qr-generator/qr-generator';
 
 @Component({
   selector: 'app-footer',
-  imports: [CommonModule, FormsModule, ],
+  imports: [CommonModule, FormsModule, QrGenerator],
   templateUrl: './footer.html',
   styleUrl: './footer.css',
 })

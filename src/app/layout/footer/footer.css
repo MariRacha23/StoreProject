@@ -135,6 +135,8 @@
   margin: 0;
 }
 
+
+
 @media (max-width: 992px) {
   .footer-content {
     grid-template-columns: 1fr 1fr;

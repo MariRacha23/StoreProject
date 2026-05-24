@@ -17,9 +17,9 @@
     },
     "FILTERS": {
       "TITLE": "ფილტრები",
-      "RECENTLY_VIEWED": "ახლახანს ნახული პროდუქტები",
+      "RECENTLY_VIEWED": "ბოლოს ნანახი პროდუქტები",
       "SHOW_ALL": "ყველა პროდუქტის ჩვენება",
-      "MY_HISTORY": "ჩემი ნახული პროდუქტები",
+      "MY_HISTORY": "ბოლოს ნანახი პროდუქტები",
       "SEARCH": "ძებნა",
       "SEARCH_PLACEHOLDER": "პროდუქტის სახელი...",
       "CATEGORY": "კატეგორია",
@@ -42,7 +42,7 @@
     },
     "PRODUCTS": {
       "SEARCH_RESULTS": "ძებნის შედეგები",
-      "NEW_ARRIVALS": "ახალი დამატებული",
+      "NEW_ARRIVALS": "პროდუქტების სია",
       "SOLD_OUT": "გაყიდულია",
       "OUT_OF_STOCK": "მარაგში აღარაა",
       "ADD_TO_CART": "კალათაში დამატება",

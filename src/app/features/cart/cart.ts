@@ -4,20 +4,51 @@ import { RouterModule } from '@angular/router';
 import { CartService } from '../../core/services/cart.service';
 import { forkJoin, map } from 'rxjs';
 import { ProductService } from '../../core/services/product-service';
+import { Gift, GiftProduct } from '../../core/services/gift';
+import { ToastService } from '../../shared/services/toastService';
 
 @Component({
   selector: 'app-cart',
   imports: [CommonModule, RouterModule],
   templateUrl: './cart.html',
   styleUrl: './cart.css',
+  providers: [Gift],
 })
 export class Cart implements OnInit {
   private cartService = inject(CartService);
   private ProductService = inject(ProductService);
+  private giftService = inject(Gift);
+  private toastService = inject(ToastService);
+
   public cartData = signal<any>(null);
+  public availableGifts = signal<GiftProduct[]>([]);
+  public selectedGift = signal<GiftProduct | null>(null);
+  public totalCartAmount = signal<number>(0);
+
+  public purchasedProducts = signal<any[]>([]);
 
   ngOnInit(): void {
     this.refreshCart();
+
+    const savedPurchases = sessionStorage.getItem('purchased_items');
+    if (savedPurchases) {
+      this.purchasedProducts.set(JSON.parse(savedPurchases));
+    }
+  }
+
+  loadGifts(): void {
+    this.giftService.getGifts().subscribe({
+      next: (gifts) => {
+        const filtered = gifts.filter((g) => this.totalCartAmount() >= g.minPurchaseAmount);
+
+        this.availableGifts.set(filtered.slice(0, 4));
+      },
+      error: (err) => this.toastService.show('Failed to load gifts.', 'error'),
+    });
+  }
+
+  selectGift(gift: GiftProduct): void {
+    this.selectedGift.set(gift);
   }
 
   refreshCart() {
@@ -25,6 +56,8 @@ export class Cart implements OnInit {
       next: (res) => {
         if (!res || !res.products || res.products.length === 0) {
           this.cartData.set({ products: [] });
+          this.totalCartAmount.set(0);
+          this.availableGifts.set([]);
           return;
         }
 
@@ -38,64 +71,114 @@ export class Cart implements OnInit {
         });
 
         forkJoin(requests).subscribe({
-          next: (enrichedProducts) => {
+          next: (enrichedProducts: unknown) => {
+            const productsArray = enrichedProducts as any[];
+
             this.cartData.set({
               ...res,
-              products: enrichedProducts,
+              products: productsArray,
             });
-            console.log('Cart updated successfully');
+
+            const total = productsArray.reduce((sum: number, item: any) => {
+              const price = item.product?.price?.current || 0;
+              return sum + price * item.quantity;
+            }, 0);
+
+            this.totalCartAmount.set(total);
+
+            this.loadGifts();
           },
-          error: (err) => console.error('Error enriching products:', err),
+          error: (err) => {
+            this.toastService.show('Failed to enrich products.', 'error');
+          },
         });
       },
       error: (err) => {
-        console.error('Cart fetch failed:', err);
+        this.toastService.show('Failed to fetch cart.', 'error');
       },
     });
   }
 
-  removeItem(productId: string) {
-    if (!productId) return;
-
-    this.cartService.removeFromCart(productId).subscribe({
+  removeItem(id: string) {
+    this.cartService.removeFromCart(id).subscribe({
       next: () => {
-        console.log('Item removed successfully');
         this.refreshCart();
-
-        this.cartService.updateCartCount();
       },
-      error: (err) => console.error('Delete error:', err),
+      error: (err) => this.toastService.show('Failed to remove item.', 'error'),
     });
   }
 
-  changeQuantity(productId: string, currentQty: number, delta: number) {
-    const newQty = currentQty + delta;
+  changeQuantity(id: string, currentQty: number, change: number) {
+    const newQty = currentQty + change;
     if (newQty < 1) return;
 
-    console.log('Sending update for:', productId, 'New Qty:', newQty);
-
-    this.cartService.updateQuantity(productId, newQty).subscribe({
+    this.cartService.updateQuantity(id, newQty).subscribe({
       next: () => {
         this.refreshCart();
-        this.cartService.updateCartCount();
       },
-      error: (err) => console.error('Update failed:', err),
+      error: (err) => this.toastService.show('Failed to update quantity.', 'error'),
     });
   }
 
   onCheckout() {
+    const currentCartProducts = this.cartData()?.products || [];
+    const chosenGift = this.selectedGift();
+
+    if (currentCartProducts.length === 0 && !chosenGift) return;
+
     if (confirm('Are you sure you want to complete the purchase?')) {
       this.cartService.checkout().subscribe({
         next: () => {
           alert('Thank you for your purchase! 🛍️');
 
-          this.cartData.set({ products: [] });
+          const savedPurchases = sessionStorage.getItem('purchased_items');
+          const newPurchases = savedPurchases ? JSON.parse(savedPurchases) : [];
+          const today = new Date().toLocaleDateString();
 
-          this.cartService.updateCartCount();
+          currentCartProducts.forEach((item: any) => {
+            if (item.product) {
+              const singlePrice = Number(item.product.price?.current || item.product.price || 0);
+              const totalPrice = singlePrice * Number(item.quantity);
+
+              newPurchases.push({
+                id: item.productId || item.product._id,
+                title: item.product.title,
+                thumbnail: item.product.images?.[0],
+                price: totalPrice,
+                singlePrice: singlePrice,
+                quantity: item.quantity,
+                purchaseDate: today,
+                isGift: false,
+              });
+            }
+          });
+
+          if (chosenGift) {
+            newPurchases.push({
+              id: chosenGift.id || (chosenGift as any)._id || 'gift_' + Date.now(),
+              title: `🎁 Gift: ${chosenGift.title}`,
+              thumbnail:
+                (chosenGift as any).thumbnail ||
+                'https://cdn-icons-png.flaticon.com/512/2279/2279413.png',
+              price: 0,
+              quantity: 1,
+              purchaseDate: today,
+              isGift: true,
+            });
+          }
+
+          sessionStorage.setItem('purchased_items', JSON.stringify(newPurchases));
+          this.purchasedProducts.set(newPurchases);
+
+          this.selectedGift.set(null);
+          this.cartData.set({ products: [] });
+          this.totalCartAmount.set(0);
+          this.availableGifts.set([]);
+
+          this.cartService.resetCartCount();
         },
         error: (err) => {
-          console.error('Checkout failed:', err);
-          alert('Checkout failed. Please try again.');
+          this.toastService.show('Checkout failed. Please try again.', 'error');
         },
       });
     }

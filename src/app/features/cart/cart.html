@@ -3,33 +3,68 @@
 
   @if (cartData() && cartData().products?.length > 0) {
   <div class="cart-layout">
-    <div class="cart-items">
-      @for (item of cartData()?.products; track item.productId) {
-      @if (item.product) {
-      <div class="cart-card">
-        <div class="img-and-titl">
-          <img [src]="item.product.thumbnail" [alt]="item.product.title">
-          <div class="item-info">
-            <h3>{{ item.product.title }}</h3>
-            <p>{{ item.product.price?.current | currency:'USD' }}</p>
+
+    <div class="cart-left-section">
+      <div class="cart-items">
+        @for (item of cartData()?.products; track item.productId) {
+        @if (item.product) {
+        <div class="cart-card">
+          <div class="img-and-titl">
+            <a [routerLink]="['/product', item.product._id]" class="product-detail-link">
+              <img [src]="item.product.thumbnail" [alt]="item.product.title">
+            </a>
+
+            <div class="item-info">
+              <h3>
+                <a [routerLink]="['/product', item.product._id]" class="product-title-link">
+                  {{ item.product.title }}
+                </a>
+              </h3>
+              <p>{{ item.product.price?.current | currency:'USD' }}</p>
+            </div>
+          </div>
+
+          <div class="item-actions">
+            <div class="quantity-controls">
+              <button (click)="changeQuantity(item.productId, item.quantity, -1)"
+                [disabled]="item.quantity <= 1">-</button>
+              <span class="qty-num">{{ item.quantity }}</span>
+              <button (click)="changeQuantity(item.productId, item.quantity, 1)"
+                [disabled]="item.quantity >= item.product.stock">
+                +
+              </button>
+            </div>
+
+            <button (click)="removeItem(item.productId)" class="remove-btn" title="Remove item">🗑️</button>
           </div>
         </div>
+        }
+        }
+      </div>
 
-        <div class="item-actions">
-          <div class="quantity-controls">
-            <button (click)="changeQuantity(item.productId, item.quantity, -1)"
-              [disabled]="item.quantity <= 1">-</button>
-            <span class="qty-num">{{ item.quantity }}</span>
-            <button (click)="changeQuantity(item.productId, item.quantity, 1)"
-              [disabled]="item.quantity >= item.product.stock">
-              +
-            </button>
+      @if (availableGifts().length > 0) {
+      <div class="gift-section">
+        <h3 class="gift-title">🎁 Choose Your Free Gift!</h3>
+        <p class="gift-subtitle">Select one complementary item for your order:</p>
+
+        <div class="gift-grid">
+          @for (gift of availableGifts(); track gift.id) {
+          <div class="gift-card" [class.selected]="selectedGift()?.id === gift.id" (click)="selectGift(gift)">
+            <div class="gift-image-wrapper">
+              <img [src]="gift.thumbnail" [alt]="gift.title">
+            </div>
+            <div class="gift-info">
+              <h4>{{ gift.title }}</h4>
+              <p>{{ gift.description }}</p>
+            </div>
+            <div class="selection-indicator">
+              <i class="fa-solid" [class.fa-circle-check]="selectedGift()?.id === gift.id"
+                [class.fa-circle]="selectedGift()?.id !== gift.id"></i>
+            </div>
           </div>
-
-          <button (click)="removeItem(item.productId)" class="remove-btn" title="Remove item">🗑️</button>
+          }
         </div>
       </div>
-      }
       }
     </div>
 
@@ -38,16 +73,77 @@
       <hr>
       <div class="summary-row">
         <span>Total:</span>
-        <span class="total-price">{{ cartData()?.total?.price?.current | currency:'USD' }}</span>
+        <span class="total-price">{{ totalCartAmount() | currency:'USD' }}</span>
       </div>
+
+      @if (selectedGift()) {
+      <div class="selected-gift-summary">
+        <small>🎁 Selected Gift: <strong>{{ selectedGift()?.title }}</strong></small>
+      </div>
+      }
+
       <button (click)="onCheckout()" class="checkout-btn">Proceed to Checkout</button>
     </div>
+
   </div>
   } @else {
   <div class="empty-cart">
     <i class="fa-solid fa-bag-shopping"></i>
     <h2>Your cart is feeling a bit light... 💨</h2>
     <button routerLink="/products" class="explore-btn">Explore Products</button>
+  </div>
+  }
+
+
+
+
+  @if (purchasedProducts().length > 0) {
+  <div class="purchase-history-section">
+    <hr class="section-divider">
+    <h3 class="orderHistory">🎁 Order History (Purchased Items)</h3>
+    <p class="history-subtitle">Products you have successfully bought in this session:</p>
+
+    <div class="purchased-products-grid">
+      @for (item of purchasedProducts(); track item.id) {
+      <div class="purchased-item-card" [class.gift-card]="item.isGift">
+        <div class="purchased-img-wrapper">
+          <img [src]="item.thumbnail" [alt]="item.title">
+        </div>
+        <div class="purchased-item-info">
+          <h4>{{ item.title }}</h4>
+          <div class="purchased-meta">
+            <span class="p-qty">Qty: <strong>{{ item.quantity }}</strong></span>
+            <span class="p-date">📅 {{ item.purchaseDate }}</span>
+          </div>
+
+          <div class="price-box">
+            @if (!item.isGift) {
+            <p class="purchased-price">Price: {{ item.price | currency:'USD' }}</p>
+            @if (item.quantity > 1) {
+            <span class="single-price-hint">({{ item.singlePrice | currency:'USD' }} each)</span>
+            }
+            } @else {
+            <p class="purchased-price free-gift">FREE GIFT</p>
+            }
+          </div>
+
+          <span class="status-badge" [class.gift-badge]="item.isGift">
+            {{ item.isGift ? 'Gift Received ✓' : 'Purchased ✓' }}
+          </span>
+        </div>
+      </div>
+      }
+    </div>
+
+    <div class="history-grand-total-wrapper">
+      <div class="grand-total-box">
+        <span>Grand Total Spent:</span>
+        <strong>
+          {{ purchasedProducts().reduce((sum, item) => sum + (item.price || 0), 0) | currency:'USD' }}
+        </strong>
+      </div>
+    </div>
+
   </div>
   }
 </div>

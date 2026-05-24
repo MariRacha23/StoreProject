@@ -12,13 +12,11 @@ import { ToastService } from '../../../shared/services/toastService';
   styleUrl: './profile.css',
 })
 export class Profile implements OnInit {
-  
   private authService = inject(Auth);
   private router = inject(Router);
   public isEditing = signal(false);
   public message = signal<{ text: string; type: 'success' | 'error' } | null>(null);
-public toastService = inject(ToastService);
-
+  public toastService = inject(ToastService);
 
   public profileForm = new FormGroup({
     firstName: new FormControl('', Validators.required),
@@ -29,7 +27,7 @@ public toastService = inject(ToastService);
     address: new FormControl('', Validators.required),
     zipcode: new FormControl('', Validators.required),
     avatar: new FormControl(''),
-    gender: new FormControl('MALE'), 
+    gender: new FormControl('MALE'),
   });
 
   public passwordForm = new FormGroup({
@@ -40,9 +38,11 @@ public toastService = inject(ToastService);
   ngOnInit(): void {
     this.authService.getUserInfo().subscribe({
       next: (user) => {
-        this.profileForm.patchValue(user);
+        if (user) {
+          this.profileForm.patchValue(user);
+        }
       },
-      error: (err) => console.error('Error fetching info::', err),
+      error: (err) => this.toastService.show('Error fetching info.', 'error'),
     });
   }
 
@@ -53,7 +53,10 @@ public toastService = inject(ToastService);
           this.message.set({ text: 'Profile updated successfully!', type: 'success' });
           this.isEditing.set(false);
         },
-        error: (err: any) => this.message.set({ text: 'Update failed', type: 'error' }),
+        error: (err: any) => {
+          this.message.set({ text: 'Update failed', type: 'error' });
+          this.toastService.show('Failed to update profile.', 'error');
+        },
       });
     }
   }
@@ -71,35 +74,32 @@ public toastService = inject(ToastService);
   }
 
   sendRecoveryEmail() {
-  const email = this.profileForm.getRawValue().email;
-  if (email) {
-    this.authService.recoveryPassword(email as string).subscribe({
-      next: () => this.toastService.show('Recovery email sent!', 'success'),
-      error: () => this.toastService.show('Error!', 'error')
+    const email = this.profileForm.getRawValue().email;
+    if (email) {
+      this.authService.recoveryPassword(email as string).subscribe({
+        next: () => this.toastService.show('Recovery email sent!', 'success'),
+        error: () => this.toastService.show('Error!', 'error'),
+      });
+    }
+  }
+
+  deleteMyAccount() {
+    if (confirm('Are you sure you want to delete your account? This action cannot be undone! 😱')) {
+      this.authService.deleteAccount().subscribe({
+        next: () => {
+          this.toastService.show('Account deleted successfully. We will miss you!', 'info');
+          this.router.navigate(['/auth/login']);
+        },
+        error: (err) => {
+          this.toastService.show('Failed to delete account. Please try again.', 'error');
+        },
+      });
+    }
+  }
+
+  logout() {
+    this.authService.singOut().subscribe({
+      next: () => this.router.navigate(['/auth/login']),
     });
   }
-}
-
-deleteMyAccount() {
-  if (confirm('Are you sure you want to delete your account? This action cannot be undone! 😱')) {
-    this.authService.deleteAccount().subscribe({
-      next: () => {
-       this.toastService.show('Account deleted successfully. We will miss you!', 'info');
-        this.router.navigate(['/auth/login']);
-      },
-      error: (err) => {
-        this.toastService.show('Failed to delete account. Please try again.', 'error');
-        console.error(err);
-      }
-    });
-  }
-}
-
-logout() {
-  this.authService.singOut().subscribe({
-    next: () => this.router.navigate(['/auth/login'])
-  });
-}
-
-
 }

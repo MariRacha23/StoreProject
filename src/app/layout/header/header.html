@@ -21,9 +21,18 @@
                         class="nav-avatar" alt="User">
                     <span>{{ authService.currentUser()?.firstName }}</span>
                 </div>
+
+                @if (authService.currentUser()?.role === 'admin'|| authService.currentUser()?.email ===
+                'hoxem98460@hilostar.com') {
+                <button routerLink="/admin" class="admin-btn">
+                    Admin Panel
+                </button>
+                }
+
                 <button class="btn-logout" (click)="logout()">
                     {{ 'NAV.LOGOUT' | translate }}
                 </button>
+
                 } @else {
                 <button class="btn-login" routerLink="/auth/login">
                     {{ 'NAV.LOGIN' | translate }}
@@ -40,18 +49,23 @@
                 <span class="cart-count">{{ cartCount() }}</span>
                 }
             </div>
+
+            <div class="cart-wrapper" routerLink="/compare">
+                <i class="fas fa-exchange-alt"></i>
+                @if (comparisonService.items().length > 0) {
+                <span class="cart-count">{{ comparisonService.items().length }}</span>
+                }
+            </div>
         </div>
 
-    <div class="language-switcher">
-  <button (click)="switchLanguage('ka')" 
-          [class.active]="langService.currentLang() === 'ka'">
-    <span class="fi fi-ge"></span> ქართული
-  </button>
+        <div class="language-switcher">
+            <button (click)="switchLanguage('ka')" [class.active]="langService.currentLang() === 'ka'">
+                <span class="fi fi-ge"></span> ქართული
+            </button>
 
-  <button (click)="switchLanguage('en')" 
-          [class.active]="langService.currentLang() === 'en'">
-    <span class="fi fi-gb"></span> English
-  </button>
-</div>
+            <button (click)="switchLanguage('en')" [class.active]="langService.currentLang() === 'en'">
+                <span class="fi fi-gb"></span> English
+            </button>
+        </div>
     </div>
 </header>

@@ -1,21 +1,24 @@
 import { inject, Injectable } from '@angular/core';
-
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ProductResponse } from '../../shared/models/product.interface';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { Api } from '../../core/services/api.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProductService {
   private http = inject(HttpClient);
+  private api = inject(Api);
+
   private baseUrl = 'https://api.everrest.educata.dev/shop/products';
+  private subPath = 'products';
 
   getProducts(pageIndex: number = 1, pageSize: number = 10): Observable<ProductResponse> {
     const params = new HttpParams()
       .set('page_index', pageIndex.toString())
       .set('page_size', pageSize.toString());
-    return this.http.get<ProductResponse>(`${this.baseUrl}/all`, { params });
+    return this.api.get<ProductResponse>(`${this.subPath}/all`, params);
   }
 
   searchProducts(
@@ -34,25 +37,28 @@ export class ProductService {
       .set('page_index', pageIndex.toString())
       .set('page_size', pageSize.toString());
 
-    if (query && query.trim() !== '') {
-      params = params.set('keywords', query);
-    }
-
+    if (query && query.trim() !== '') params = params.set('keywords', query);
     if (minPrice) params = params.set('price_min', minPrice.toString());
     if (maxPrice) params = params.set('price_max', maxPrice.toString());
-    if (rating !== undefined && rating !== null) {
-      params = params.set('rating', rating.toString());
-    }
+    if (rating !== undefined && rating !== null) params = params.set('rating', rating.toString());
     if (category_id) params = params.set('category_id', category_id);
     if (brand) params = params.set('brand', brand.toLowerCase());
     if (sortBy) params = params.set('sort_by', sortBy);
     if (sortDirection) params = params.set('sort_direction', sortDirection);
 
-    return this.http.get<any>(`${this.baseUrl}/search`, { params });
+    return this.api.get<any>(`${this.subPath}/search`, params);
   }
 
   getProductById(id: string): Observable<any> {
-    return this.http.get(`${this.baseUrl}/id/${id}`);
+    return this.api.get<any>(`${this.subPath}/id/${id}`);
+  }
+
+  getCategories(): Observable<any[]> {
+    return this.api.get<any[]>(`${this.subPath}/categories`);
+  }
+
+  getBrands(): Observable<string[]> {
+    return this.api.get<string[]>(`${this.subPath}/brands`);
   }
 
   rateProduct(productId: string, rating: number): Observable<any> {
@@ -69,11 +75,19 @@ export class ProductService {
     return this.http.post(`${this.baseUrl}/rate`, body, { headers });
   }
 
-  getCategories(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/categories`);
+  addProduct(data: any): Observable<any> {
+    const token = sessionStorage.getItem('user_token');
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+    return this.http.post(this.baseUrl, data, { headers });
   }
 
-  getBrands(): Observable<string[]> {
-    return this.http.get<string[]>(`${this.baseUrl}/brands`);
+  deleteProduct(id: string): Observable<any> {
+    const token = sessionStorage.getItem('user_token');
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+    return this.http.delete<any>(`${this.baseUrl}/${id}`, { headers });
   }
 }

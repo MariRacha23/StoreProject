@@ -63,3 +63,32 @@ input, button, textarea, select {
 p, h1, h2, h3, h4, h5, h6 {
     overflow-wrap: break-word;
 }
+
+
+:root {
+  --bg-color: #f8fafc;
+  --text-color: #1e293b;
+  --card-bg: #ffffff;
+  --sidebar-bg: #ffffff;
+  --accent-color: #0ea5e9; 
+  --secondary-text: #64748b;
+  --input-bg: #ffffff;
+  --border-color: #e2e8f0;
+}
+
+body.dark-theme {
+  --bg-color: #0a192f;
+  --text-color: #e6f1ff;
+  --card-bg: #112240;
+  --sidebar-bg: #112240;
+  --accent-color: #64ffda; 
+  --secondary-text: #8892b0;
+  --input-bg: #0a192f;
+  --border-color: rgba(100, 255, 218, 0.1);
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}

@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
-import { Observable, tap } from 'rxjs';
+import { catchError, Observable, of, switchMap, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -33,6 +33,7 @@ export class Auth {
         sessionStorage.setItem('user_token', res.access_token);
         sessionStorage.setItem('refresh_token', res.refresh_token);
       }),
+      switchMap(() => this.getUserInfo()),
     );
   }
 
@@ -90,8 +91,17 @@ export class Auth {
   }
 
   getUserInfo() {
-    return this.http
-      .get(`${this.baseUrl}`, { headers: this.getHeaders() })
-      .pipe(tap((user) => this.currentUser.set(user)));
+    const token = sessionStorage.getItem('user_token');
+    if (!token) return of(null);
+
+    return this.http.get(`${this.baseUrl}`, { headers: { Authorization: `Bearer ${token}` } }).pipe(
+      tap((user) => {
+        this.currentUser.set(user);
+        sessionStorage.setItem('currentUser', JSON.stringify(user));
+      }),
+      catchError((err) => {
+        return of(null);
+      }),
+    );
   }
 }

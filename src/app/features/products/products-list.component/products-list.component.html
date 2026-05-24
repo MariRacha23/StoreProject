@@ -1,9 +1,29 @@
-<section class="hero">
-  <div class="hero-content">
-    <h1 class="fade-in-up">{{ 'HOME.HERO.TITLE' | translate }}</h1>
-    <p class="fade-in-up-delay">{{ 'HOME.HERO.SUBTITLE' | translate }}</p>
-    <button class="shop-now-btn fade-in-up-delay-2" (click)="scrollToProducts()">{{ 'HOME.HERO.SHOP_NOW' | translate
-      }}</button>
+<section class="hero-container">
+  <div class="carousel-wrapper">
+    <div class="slide side-slide prev" (click)="prevSlide()">
+      <img [src]="slides[(currentSlide() + slides.length - 1) % slides.length]" alt="prev">
+    </div>
+
+    <div class="slide main-slide">
+      <img [src]="slides[currentSlide()]" alt="main">
+      <div class="hero-text-card">
+        <h1>{{ 'HOME.HERO.TITLE' | translate }}</h1>
+        <p>{{ 'HOME.HERO.SUBTITLE' | translate }}</p>
+        <button class="shop-now-btn" (click)="scrollToProducts()">
+          {{ 'HOME.HERO.SHOP_NOW' | translate }}
+        </button>
+      </div>
+    </div>
+
+    <div class="slide side-slide next" (click)="nextSlide()">
+      <img [src]="slides[(currentSlide() + 1) % slides.length]" alt="next">
+    </div>
+  </div>
+
+  <div class="slider-dots">
+    @for (slide of slides; track $index) {
+    <span class="dot" [class.active]="$index === currentSlide()" (click)="currentSlide.set($index)"></span>
+    }
   </div>
 </section>
 
@@ -134,6 +154,12 @@
             {{ product.stock === 0 ? ('HOME.PRODUCTS.OUT_OF_STOCK' | translate) : ('HOME.PRODUCTS.ADD_TO_CART' |
             translate) }}
           </button>
+
+
+          <button class="compare-btn" (click)="addToCompare($event, product)" [class.active]="isInCompare(product._id)">
+            <i class="fas fa-exchange-alt"></i>
+          </button>
+
         </div>
       </div>
       } @empty {
@@ -168,25 +194,53 @@
         <button (click)="toggleChat()">×</button>
       </div>
       <div class="chat-messages" #scrollMe>
-        @for (msg of messages(); track $index) {
-        <div [class]="'message ' + msg.role" style="white-space: pre-wrap;">
-          {{ msg.content }}
-        </div>
+
+        @if (messages().length <= 1) { <div class="quick-replies-container">
+          <p class="quick-title">💡 პოპულარული კითხვები:</p>
+          <div class="quick-buttons">
+            <button (click)="sendQuickMessage('რომელია ყველაზე მაღალფასიანი პროდუქტი თქვენს მაღაზიაში?')">
+              💰 ყველაზე ძვირადღირებული
+            </button>
+            <button (click)="sendQuickMessage('მაჩვენე ყველაზე დაბალფასიანი/ბიუჯეტური პროდუქტები.')">
+              📉 ყველაზე ბიუჯეტური
+            </button>
+            <button (click)="sendQuickMessage('რომელ პროდუქტებს აქვს ყველაზე მაღალი რეიტინგი?')">
+              ⭐ საუკეთესო რეიტინგის მქონე
+            </button>
+          </div>
+      </div>
+      }
+
+      @for (msg of messages(); track $index) {
+      <div [class]="'message ' + msg.role">
+        @if (msg.role === 'user') {
+        <div class="user-text">{{ msg.content }}</div>
+        } @else {
+        <markdown [data]="msg.content"></markdown>
         }
       </div>
-      <div class="chat-input">
-        <input #chatInput (keyup.enter)="sendMessage(chatInput.value); chatInput.value = ''"
-          placeholder="Ask about products...">
-      </div>
+      }
     </div>
-    }
-
-    <button class="chat-bubble" (click)="toggleChat()">
-      @if (!isChatOpen()) {
-      <i class="fas fa-comment-dots"></i> } @else {
-      <i class="fas fa-times"></i> }
-    </button>
+    <div class="chat-input">
+      <input #chatInput (keyup.enter)="sendMessage(chatInput.value); chatInput.value = ''"
+        placeholder="Ask about products...">
+    </div>
   </div>
+  }
+
+  <button class="chat-bubble" (click)="toggleChat()">
+    @if (!isChatOpen()) {
+    <i class="fas fa-comment-dots"></i> } @else {
+    <i class="fas fa-times"></i> }
+  </button>
+</div>
+
+<button class="theme-toggle-btn" (click)="toggleTheme()"
+  [title]="isDarkMode() ? 'Switch to Light Mode' : 'Switch to Dark Mode'">
+  @if (isDarkMode()) {
+  <i class="fas fa-sun"></i> } @else {
+  <i class="fas fa-moon"></i> }
+</button>
 
 
 </div>

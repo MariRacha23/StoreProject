@@ -1,12 +1,14 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, catchError, Observable, tap } from 'rxjs';
+import { ToastService } from '../../shared/services/toastService';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CartService {
   private http = inject(HttpClient);
+  private toastService = inject(ToastService);
   private apiUrl = 'https://api.everrest.educata.dev/shop/cart';
 
   private cartCount = new BehaviorSubject<number>(0);
@@ -59,22 +61,26 @@ export class CartService {
         this.cartCount.next(totalItems);
       },
       error: (err) => {
-        console.error('Error fetching cart for count:', err);
+        this.toastService.show('Error fetching cart for count.', 'error');
         this.cartCount.next(0);
       },
     });
   }
 
- updateQuantity(productId: string, quantity: number): Observable<any> {
+  updateQuantity(productId: string, quantity: number): Observable<any> {
     const body = {
       id: productId,
-      quantity: Number(quantity)
+      quantity: Number(quantity),
     };
     return this.http.patch(`${this.apiUrl}/product`, body, { headers: this.getHeaders() });
   }
 
   checkout(): Observable<any> {
-
- return this.http.post(`${this.apiUrl}/checkout`, {}, { headers: this.getHeaders() });
+    return this.http.post(`${this.apiUrl}/checkout`, {}, { headers: this.getHeaders() });
   }
+  resetCartCount() {
+    this.cartCount.next(0);
+  }
+
+
 }

@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -10,13 +10,15 @@ export class Api {
 
   private baseUrl = 'https://api.everrest.educata.dev/shop';
 
-get<T>(path: string, params?: any): Observable<T> {
-  return this.http.get<T>(`${this.baseUrl}/${path}`, { params });
-}
+  get<T>(path: string, params?: any): Observable<T> {
+    return this.http.get<T>(`${this.baseUrl}/${path}`, { params });
+  }
 
   post<T>(path: string, body: any): Observable<T> {
     return this.http.post<T>(`${this.baseUrl}/${path}`, body);
   }
 
-
+  delete<T>(path: string, headers?: HttpHeaders): Observable<T> {
+    return this.http.delete<T>(`${this.baseUrl}/${path}`, { headers });
+  }
 }

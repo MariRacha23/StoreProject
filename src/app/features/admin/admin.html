@@ -1,0 +1,59 @@
+<div class="admin-panel">
+  <div class="admin-header">
+    <h1>Admin Dashboard</h1>
+    <button class="add-btn" (click)="toggleModal()">+ Add Product</button>
+  </div>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th>Product Name</th>
+          <th>Price</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (product of products(); track product._id) {
+          <tr>
+            <td>
+              <img [src]="product.thumbnail || product.images[0]" class="admin-prod-img" alt="product">
+            </td>
+            <td>{{ product.title }}</td>
+            <td class="price-cell">{{ product.price?.current || product.price }} $</td>
+            <td>
+              <div class="actions">
+                <button class="delete-icon" (click)="deleteProduct(product._id)">Delete</button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (isModalOpen()) {
+    <div class="modal-overlay">
+      <div class="modal-content">
+        <h2>Add New Product</h2>
+        <form [formGroup]="productForm" (ngSubmit)="submitProduct()">
+          <input type="text" formControlName="title" placeholder="Product Title">
+          <textarea formControlName="description" placeholder="Description"></textarea>
+          <input type="number" formControlName="price" placeholder="Price">
+          
+          <input type="text" formControlName="brand" placeholder="Brand">
+          <input type="number" formControlName="stock" placeholder="Stock Amount">
+          
+          <input type="text" formControlName="categoryID" placeholder="Category ID (Swagger-იდან)">
+          <input type="text" formControlName="image" placeholder="Image URL">
+          
+          <div class="modal-actions">
+            <button type="button" class="cancel-btn" (click)="toggleModal()">Cancel</button>
+            <button type="submit" class="submit-btn">Save Product</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

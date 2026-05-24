@@ -1,0 +1,30 @@
+<button class="qr-btn" (click)="toggleModal()">
+  Scan to View on Mobile
+</button>
+
+@if (isModalOpen()) {
+  <div class="qr-overlay" (click)="toggleModal()">
+    <div class="qr-modal" (click)="$event.stopPropagation()">
+       </div>
+  </div>
+}
+
+
+@if (isModalOpen()) {
+  <div class="qr-overlay" (click)="toggleModal()">
+    <div class="qr-modal" (click)="$event.stopPropagation()">
+      <button class="close-btn" (click)="toggleModal()">&times;</button>
+      
+      <h3>Visit us on Mobile</h3>
+      <p>Scan the QR code below to open our shop on your phone.</p>
+
+      <div class="qr-container">
+        @if (qrCodeImage()) {
+          <img [src]="qrCodeImage()" alt="Shop QR Code">
+        } @else {
+          <div class="loader">Generating...</div>
+        }
+      </div>
+    </div>
+  </div>
+}

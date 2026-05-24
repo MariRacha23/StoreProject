@@ -37,15 +37,13 @@ export class Login {
     if (this.loginForm.valid) {
       this.authService.signIn(this.loginForm.value).subscribe({
         next: (data: any) => {
-          sessionStorage.setItem('user_token', data.access_token);
+          this.toastService.show('Welcome back!', 'success');
 
-          this.authService.getUserInfo().subscribe(() => {
-            this.toastService.show('Welcome back!', 'success');
-            this.router.navigate(['/products']);
-          });
+          this.router.navigate(['/']);
         },
         error: (err: any) => {
           this.errorMessage.set('Invalid email or password');
+          this.toastService.show('Login failed!', 'error');
         },
       });
     }

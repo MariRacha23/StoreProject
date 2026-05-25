@@ -1,7 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -11,7 +10,7 @@ export class Ai {
   private apiUrl = '/api-claude/v1/messages';
 
   askCloude(question: string, allProducts: any[], isLoggedIn: boolean = false): Observable<string> {
-    const apiKey = environment.aiApikey;
+    const apiKey = (window as any).env?.CLAUDE_API_KEY || "";
     const context = allProducts
       .map(
         (p) =>

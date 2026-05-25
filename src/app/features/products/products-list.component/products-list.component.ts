@@ -13,7 +13,6 @@ import { ProductService } from '../../../core/services/product-service';
 import { Product } from '../../../shared/models/product.interface';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { ImageFallbackPipe } from '../../../shared/pipes/image-fallback-pipe';
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 import { CartService } from '../../../core/services/cart.service';
 import { ToastService } from '../../../shared/services/toastService';
@@ -28,7 +27,6 @@ import { MarkdownModule, provideMarkdown } from 'ngx-markdown';
     CommonModule,
     RouterModule,
     FormsModule,
-    ImageFallbackPipe,
     TranslateModule,
     MarkdownModule,
   ],

@@ -119,7 +119,7 @@
       <div class="product-card slide-in" [class.is-sold-out]="product.stock === 0">
 
         <div class="image-wrapper" [routerLink]="['/product', product._id]">
-          <img [src]="product.thumbnail | imageFallback:product.category.name" [alt]="product.title">
+          <img [src]="product.thumbnail " [alt]="product.title">
 
           @if (product.stock === 0) {
           <div class="sold-out-overlay">

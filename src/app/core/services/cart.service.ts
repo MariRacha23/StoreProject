@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { BehaviorSubject, catchError, Observable, tap } from 'rxjs';
+import { BehaviorSubject, catchError, Observable, of, tap } from 'rxjs';
 import { ToastService } from '../../shared/services/toastService';
 
 @Injectable({
@@ -42,6 +42,10 @@ export class CartService {
   }
 
   getCart(): Observable<any> {
+    const token = sessionStorage.getItem('user_token');
+    if (!token) {
+      return of({ products: [] });
+    }
     return this.http.get(this.apiUrl, { headers: this.getHeaders() });
   }
 
@@ -55,6 +59,11 @@ export class CartService {
   }
 
   updateCartCount() {
+    const token = sessionStorage.getItem('user_token');
+    if (!token) {
+      this.cartCount.next(0);
+      return;
+    }
     this.getCart().subscribe({
       next: (cart: any) => {
         const totalItems = cart.products?.length || 0;
